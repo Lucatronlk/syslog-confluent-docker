@@ -1,50 +1,80 @@
 ---
-version: '2'
+version: '3'
 services:
+  global-services:
+      build: 
+        context: .
+        dockerfile: Dockerfile
+      environment:
+          CONNECT_REST_ADVERTISED_HOST_NAME: "syslog-connect"
+          CONNECT_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+          CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: $SCHEMA_REGISTRY_URL
+          CONNECT_VALUE_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: $BASIC_AUTH_CREDENTIALS_SOURCE
+          CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO      
+          CONNECT_GROUP_ID: syslog-connect
+          CONNECT_CONFIG_STORAGE_TOPIC: syslog-connect-configs
+          CONNECT_OFFSET_STORAGE_TOPIC: syslog-connect-offsets
+          CONNECT_STATUS_STORAGE_TOPIC: syslog-connect-status
+          CONNECT_REPLICATION_FACTOR: 3
+          CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+          CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+          CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+          CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+          CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+          CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: false
+          CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+          CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+          CONNECT_LOG4J_LOGGERS: org.reflections:ERROR
+          # CLASSPATH required due to CC-2422
+          CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-6.2.0.jar
+          # Connect worker
+          CONNECT_SECURITY_PROTOCOL: SASL_SSL
+          CONNECT_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+          CONNECT_SASL_MECHANISM: PLAIN
+          # Connect producer
+          CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+          CONNECT_PRODUCER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+          CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
+          # Connect consumer
+          CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_SSL
+          CONNECT_CONSUMER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+          CONNECT_CONSUMER_SASL_MECHANISM: PLAIN 
   syslog-connect-1:
-    build: 
-      context: .
-      dockerfile: Dockerfile
     hostname: syslog-connect-1
     container_name: syslog-connect-1
+    extends: global-services
     ports:
       - "8083:8083"
       - "5454:5454"
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
-      CONNECT_GROUP_ID: "syslog-connect"
-      CONNECT_CONFIG_STORAGE_TOPIC: syslog-connect-configs
-      CONNECT_OFFSET_STORAGE_TOPIC: syslog-connect-offsets
-      CONNECT_STATUS_STORAGE_TOPIC: syslog-connect-status
-      CONNECT_REPLICATION_FACTOR: 3
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
-      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
-      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: $SCHEMA_REGISTRY_URL
-      CONNECT_VALUE_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: $BASIC_AUTH_CREDENTIALS_SOURCE
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
       CONNECT_REST_ADVERTISED_HOST_NAME: "syslog-connect-1"
       CONNECT_LISTENERS: "http://syslog-connect-1:8083"
-      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
-      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
-      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
-      # CLASSPATH required due to CC-2422
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-6.2.0.jar
-      # Connect worker
-      CONNECT_SECURITY_PROTOCOL: SASL_SSL
-      CONNECT_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
-      CONNECT_SASL_MECHANISM: PLAIN
-
-      # Connect producer
-      CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
-      CONNECT_PRODUCER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
-      CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
-
-      # Connect consumer
-      CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_SSL
-      CONNECT_CONSUMER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
-      CONNECT_CONSUMER_SASL_MECHANISM: PLAIN
-
+    command: /bin/bash -c "/tmp/wait-for-it.sh syslog-connect-1:8083 -s -t 60 -- /tmp/generate_syslog.sh syslog-connect-1"  
+    depends_on: 
+        - global-services 
+  syslog-connect-2:  
+    hostname: syslog-connect-2
+    container_name: syslog-connect-2
+    extends: global-services
+    ports:
+      - "8084:8083"
+      - "5455:5454"
+    environment:
+      CONNECT_REST_ADVERTISED_HOST_NAME: "syslog-connect-2"
+      CONNECT_LISTENERS: "http://syslog-connect-2:8084"
+    command: /bin/bash -c "/tmp/wait-for-it.sh syslog-connect-2:8083 -s -t 60 -- /tmp/generate_syslog.sh syslog-connect-2"
+    depends_on: 
+        - global-services    
+  syslog-connect-3:  
+    hostname: syslog-connect-3
+    container_name: syslog-connect-3
+    extends: global-services
+    ports:
+      - "8085:8083"
+      - "5456:5454"
+    environment:
+      CONNECT_REST_ADVERTISED_HOST_NAME: "syslog-connect-3"
+      CONNECT_LISTENERS: "http://syslog-connect-3:8085"
+    command: /bin/bash -c "/tmp/wait-for-it.sh syslog-connect-3:8083 -s -t 60 -- /tmp/generate_syslog.sh syslog-connect-3"
+    depends_on: 
+        - global-services   
