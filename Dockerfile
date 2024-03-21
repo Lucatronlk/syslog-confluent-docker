@@ -18,13 +18,8 @@ ENV CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
 
 RUN confluent-hub install --no-prompt confluentinc/kafka-connect-syslog:latest
 
-
-
 COPY generate_syslog.sh /tmp/generate_syslog.sh
 
-# RUN chmod +x /tmp/generate_syslog.sh
-
-# Download wait-for-it.sh from GitHub
 COPY wait-for-it.sh /tmp/wait-for-it.sh
 
-# RUN chmod +x /tmp/wait-for-it.sh
+#RUN /tmp/wait-for-it.sh $HOSTNAME:8083 -s -t 60 -- /tmp/generate_syslog.sh $HOSTNAME
