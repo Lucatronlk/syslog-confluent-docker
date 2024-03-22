@@ -1,0 +1,36 @@
+{
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "logger": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["low_severity", "medium_severity", "high_severity"]
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "destination": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "attack_type": {
+          "type": "string"
+        }
+      },
+      "required": ["timestamp", "logger", "severity", "protocol", "source", "destination", "action", "attack_type"]
+    }
+  }
+  

@@ -1,0 +1,200 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "CloudWatchLog",
+    "type": "object",
+    "properties": {
+      "partition": {
+        "type": "integer",
+        "description": "The partition of the log entry."
+      },
+      "offset": {
+        "type": "integer",
+        "description": "The offset of the log entry."
+      },
+      "timestamp": {
+        "type": "integer",
+        "description": "The timestamp of the log entry."
+      },
+      "timestampType": {
+        "type": "string",
+        "description": "The type of timestamp."
+      },
+      "key": {
+        "type": "string",
+        "description": "The key of the log entry."
+      },
+      "value": {
+        "type": "object",
+        "properties": {
+          "eventVersion": {
+            "type": "string",
+            "description": "The version of the event."
+          },
+          "userIdentity": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of the identity."
+              },
+              "principalId": {
+                "type": "string",
+                "description": "The principal ID of the identity."
+              },
+              "arn": {
+                "type": "string",
+                "description": "The ARN of the identity."
+              },
+              "accountId": {
+                "type": "string",
+                "description": "The account ID of the identity."
+              },
+              "accessKeyId": {
+                "type": "string",
+                "description": "The access key ID of the identity."
+              },
+              "userName": {
+                "type": "string",
+                "description": "The user name of the identity."
+              }
+            }
+          },
+          "eventTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time when the event occurred."
+          },
+          "eventSource": {
+            "type": "string",
+            "description": "The source of the event."
+          },
+          "eventName": {
+            "type": "string",
+            "description": "The name of the event."
+          },
+          "awsRegion": {
+            "type": "string",
+            "description": "The AWS region where the event occurred."
+          },
+          "sourceIPAddress": {
+            "type": "string",
+            "format": "ipv4",
+            "description": "The source IP address of the event."
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "The user agent associated with the event."
+          },
+          "requestParameters": {
+            "type": "object",
+            "properties": {
+              "logGroupName": {
+                "type": "string",
+                "description": "The log group name."
+              },
+              "logStreamName": {
+                "type": "string",
+                "description": "The log stream name."
+              },
+              "nextToken": {
+                "type": "string",
+                "description": "The next token."
+              },
+              "startFromHead": {
+                "type": "boolean",
+                "description": "Indicates if starting from the head."
+              },
+              "unmask": {
+                "type": "boolean",
+                "description": "Indicates if unmasking is enabled."
+              }
+            }
+          },
+          "responseElements": {
+            "type": ["object", "null"],
+            "description": "The response elements."
+          },
+          "requestID": {
+            "type": "string",
+            "description": "The request ID."
+          },
+          "eventID": {
+            "type": "string",
+            "description": "The event ID."
+          },
+          "readOnly": {
+            "type": "boolean",
+            "description": "Indicates if the event is read-only."
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "accountId": {
+                  "type": "string",
+                  "description": "The account ID."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The type of resource."
+                },
+                "ARN": {
+                  "type": "string",
+                  "description": "The ARN of the resource."
+                }
+              }
+            },
+            "description": "The resources associated with the event."
+          },
+          "eventType": {
+            "type": "string",
+            "description": "The type of event."
+          },
+          "apiVersion": {
+            "type": "string",
+            "description": "The API version."
+          },
+          "managementEvent": {
+            "type": "boolean",
+            "description": "Indicates if it's a management event."
+          },
+          "recipientAccountId": {
+            "type": "string",
+            "description": "The recipient account ID."
+          },
+          "eventCategory": {
+            "type": "string",
+            "description": "The category of the event."
+          },
+          "tlsDetails": {
+            "type": "object",
+            "properties": {
+              "tlsVersion": {
+                "type": "string",
+                "description": "The TLS version."
+              },
+              "cipherSuite": {
+                "type": "string",
+                "description": "The cipher suite."
+              },
+              "clientProvidedHostHeader": {
+                "type": "string",
+                "description": "The client-provided host header."
+              }
+            },
+            "description": "Details about TLS."
+          }
+        }
+      },
+      "headers": {
+        "type": "array",
+        "description": "The headers associated with the log entry."
+      },
+      "exceededFields": {
+        "type": ["array", "null"],
+        "description": "Exceeded fields."
+      }
+    }
+  }
+  

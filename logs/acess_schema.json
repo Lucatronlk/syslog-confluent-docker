@@ -1,0 +1,39 @@
+{
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "logger": {
+          "type": "string"
+        },
+        "ip_address": {
+          "type": "string",
+          "format": "ipv4"
+        },
+        "user": {
+          "type": "string"
+        },
+        "request": {
+          "type": "string"
+        },
+        "status_code": {
+          "type": "integer"
+        },
+        "response_size": {
+          "type": "integer"
+        },
+        "referrer": {
+          "type": "string"
+        },
+        "user_agent": {
+          "type": "string"
+        }
+      },
+      "required": ["timestamp", "logger", "ip_address", "user", "request", "status_code", "response_size", "referrer", "user_agent"]
+    }
+  }
+  

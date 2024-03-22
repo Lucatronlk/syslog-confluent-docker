@@ -1,0 +1,216 @@
+---
+version: '3'
+services:
+  syslog-connect-1:
+    build: 
+        context: .
+        dockerfile: Dockerfile  
+    hostname: syslog-connect-1
+    container_name: syslog-connect-1
+    ports:
+      - "8083:8083"
+      - "5454:5454"
+    environment:
+      CONNECT_REST_ADVERTISED_HOST_NAME: "syslog-connect-1"
+      CONNECT_LISTENERS: "http://syslog-connect-1:8083"
+      CONNECT_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: $SCHEMA_REGISTRY_URL
+      CONNECT_VALUE_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: $BASIC_AUTH_CREDENTIALS_SOURCE
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+      CONNECT_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+      CONNECT_GROUP_ID: "syslog-connect"
+      CONNECT_CONFIG_STORAGE_TOPIC: "_syslog-connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "_syslog-connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "_syslog-connect-status"
+      CONNECT_REPLICATION_FACTOR: "3"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
+      CONNECT_LOG4J_LOGGERS.org.reflections: "ERROR"
+      CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+      CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+     # CLASSPATH required due to CC-2422
+      CLASSPATH: "/usr/share/java/monitoring-interceptors/monitoring-interceptors-6.2.0.jar"
+      CONNECT_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_SASL_MECHANISM: "PLAIN"
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_PRODUCER_SASL_MECHANISM: "PLAIN"
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_CONSUMER_SASL_MECHANISM: "PLAIN" 
+    command: 
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash 
+      - -c 
+      - |
+        #
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run & 
+        #
+        echo "Waiting for Kafka Connect to start listening on $$CONNECT_LISTENERS ⏳"
+        while : ; do
+          curl_status=$$(curl -s -o /dev/null -w %{http_code} http://$$CONNECT_LISTENERS/connectors)
+          echo -e $$(date) " Kafka Connect listener HTTP state: " $$curl_status " (waiting for 200)"
+          if [ $$curl_status -eq 000 ] ; then
+            start_time=$$(date +%s)
+            end_time=$$((start_time + 600))
+            echo -e "Kafka Connect Preparing to send messages"
+            while [[ $$(date +%s) -lt $$end_time ]]; do
+              echo "$$(date +'%Y-%m-%dT%H:%M:%S') Sample $$CONNECT_REST_ADVERTISED_HOST_NAME message" >> /dev/udp/localhost/514
+              echo -e "Sent messages"
+              sleep 5
+            done
+            break
+          fi
+          sleep 5 
+        done
+        #
+        sleep infinity      
+  syslog-connect-2:
+    build: 
+        context: .
+        dockerfile: Dockerfile  
+    hostname: syslog-connect-2
+    container_name: syslog-connect-2
+    ports:
+      - "8084:8083"
+      - "5455:5454"
+    environment:
+      CONNECT_REST_ADVERTISED_HOST_NAME: "syslog-connect-2"
+      CONNECT_LISTENERS: "http://syslog-connect-2:8084"
+      CONNECT_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: $SCHEMA_REGISTRY_URL
+      CONNECT_VALUE_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: $BASIC_AUTH_CREDENTIALS_SOURCE
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+      CONNECT_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+      CONNECT_GROUP_ID: "syslog-connect"
+      CONNECT_CONFIG_STORAGE_TOPIC: "_syslog-connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "_syslog-connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "_syslog-connect-status"
+      CONNECT_REPLICATION_FACTOR: "3"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
+      CONNECT_LOG4J_LOGGERS.org.reflections: "ERROR"
+      CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+      CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+     # CLASSPATH required due to CC-2422
+      CLASSPATH: "/usr/share/java/monitoring-interceptors/monitoring-interceptors-6.2.0.jar"
+      CONNECT_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_SASL_MECHANISM: "PLAIN"
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_PRODUCER_SASL_MECHANISM: "PLAIN"
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_CONSUMER_SASL_MECHANISM: "PLAIN"         
+    command: 
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash 
+      - -c 
+      - |
+        #
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run & 
+        #
+        echo "Waiting for Kafka Connect to start listening on $$CONNECT_LISTENERS ⏳"
+        while : ; do
+          curl_status=$$(curl -s -o /dev/null -w %{http_code} http://$$CONNECT_LISTENERS/connectors)
+          echo -e $$(date) " Kafka Connect listener HTTP state: " $$curl_status " (waiting for 200)"
+          if [ $$curl_status -eq 000 ] ; then
+            start_time=$$(date +%s)
+            end_time=$$((start_time + 600))
+            echo -e "Kafka Connect Preparing to send messages"
+            while [[ $$(date +%s) -lt $$end_time ]]; do
+              echo "$$(date +'%Y-%m-%dT%H:%M:%S') Sample $$CONNECT_REST_ADVERTISED_HOST_NAME message" >> /dev/udp/localhost/514
+              echo -e "Sent messages"
+              sleep 5
+            done
+            break
+          fi
+          sleep 5 
+        done
+        #
+        sleep infinity  
+  syslog-connect-3:
+    build: 
+        context: .
+        dockerfile: Dockerfile  
+    hostname: syslog-connect-3
+    container_name: syslog-connect-3
+    ports:
+      - "8085:8083"
+      - "5456:5454"
+    environment:
+      CONNECT_REST_ADVERTISED_HOST_NAME: "syslog-connect-3"
+      CONNECT_LISTENERS: "http://syslog-connect-3:8085"
+      CONNECT_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: $SCHEMA_REGISTRY_URL
+      CONNECT_VALUE_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: $BASIC_AUTH_CREDENTIALS_SOURCE
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+      CONNECT_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: $SASL_JAAS_CONFIG 
+      CONNECT_GROUP_ID: "syslog-connect"
+      CONNECT_CONFIG_STORAGE_TOPIC: "_syslog-connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "_syslog-connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "_syslog-connect-status"
+      CONNECT_REPLICATION_FACTOR: "3"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "3"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
+      CONNECT_LOG4J_LOGGERS.org.reflections: "ERROR"
+      CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+      CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+     # CLASSPATH required due to CC-2422
+      CLASSPATH: "/usr/share/java/monitoring-interceptors/monitoring-interceptors-6.2.0.jar"
+      CONNECT_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_SASL_MECHANISM: "PLAIN"
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_PRODUCER_SASL_MECHANISM: "PLAIN"
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: "SASL_SSL"
+      CONNECT_CONSUMER_SASL_MECHANISM: "PLAIN"            
+    command: 
+      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
+      - bash 
+      - -c 
+      - |
+        #
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run & 
+        #
+        echo "Waiting for Kafka Connect to start listening on $$CONNECT_LISTENERS ⏳"
+        while : ; do
+          curl_status=$$(curl -s -o /dev/null -w %{http_code} http://$$CONNECT_LISTENERS/connectors)
+          echo -e $$(date) " Kafka Connect listener HTTP state: " $$curl_status " (waiting for 200)"
+          if [ $$curl_status -eq 000 ] ; then
+            start_time=$$(date +%s)
+            end_time=$$((start_time + 600))
+            echo -e "Kafka Connect Preparing to send messages"
+            while [[ $$(date +%s) -lt $$end_time ]]; do
+              echo "$$(date +'%Y-%m-%dT%H:%M:%S') Sample $$CONNECT_REST_ADVERTISED_HOST_NAME message" >> /dev/udp/localhost/514
+              echo -e "Sent messages"
+              sleep 5
+            done
+            break
+          fi
+          sleep 5 
+        done
+        #
+        sleep infinity

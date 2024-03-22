@@ -1,0 +1,7 @@
+boto3
+confluent_kafka
+avro
+py-ccloud
+requests
+certifi
+confluent-kafka[avro,json,protobuf]
