@@ -21,5 +21,3 @@ RUN confluent-hub install --no-prompt confluentinc/kafka-connect-syslog:latest
 COPY generate_syslog.sh /tmp/generate_syslog.sh
 
 COPY wait-for-it.sh /tmp/wait-for-it.sh
-
-#RUN /tmp/wait-for-it.sh $HOSTNAME:8083 -s -t 60 -- /tmp/generate_syslog.sh $HOSTNAME
