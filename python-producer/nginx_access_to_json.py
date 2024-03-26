@@ -5,7 +5,7 @@ import json
 log_entries = []
 
 # Open the log file for reading
-with open("logs/access.log", 'r') as f:
+with open('logs/access.log', 'r') as f:
     for line in f:
         # Define the regular expression pattern to match the log format
         pattern = re.compile(r'\[(.*?)\] - (\S+) (\S+) - (\S+) "(.*?)" (\d+) (\d+) "(.*?)" "(.*?)"')
@@ -26,8 +26,8 @@ with open("logs/access.log", 'r') as f:
             # Append the dictionary to the list of log entries
             log_entries.append(dic)
         else:
-            print("Failed to parse line:", line)
+            print('Failed to parse line:', line)
 
 # Write the list of log entries to a JSON file
-with open("logs/access.json", 'w') as new_f:
+with open('logs/access.json', 'w') as new_f:
     json.dump(log_entries, new_f, indent=4)

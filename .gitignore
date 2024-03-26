@@ -3,3 +3,5 @@ my-syslog-docker-start.sh
 syslog-connector-config.json
 generated-syslog-connector-config.txt
 *.env
+*.config
+*.properties

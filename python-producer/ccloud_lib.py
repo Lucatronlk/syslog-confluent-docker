@@ -45,7 +45,7 @@ class Name(object):
     """
 
     # Use __slots__ to explicitly declare all data members.
-    __slots__ = ["name", "id"]
+    __slots__ = ['name', 'id']
 
     def __init__(self, name=None):
         self.name = name
@@ -88,7 +88,7 @@ class Count(object):
     """
 
     # Use __slots__ to explicitly declare all data members.
-    __slots__ = ["count", "id"]
+    __slots__ = ['count', 'id']
 
     def __init__(self, count=None):
         self.count = count
@@ -116,17 +116,17 @@ def parse_args():
     """Parse command line arguments"""
 
     parser = argparse.ArgumentParser(
-             description="Confluent Python Client example to produce messages \
-                  to Confluent Cloud")
+             description='Confluent Python Client example to produce messages \
+                  to Confluent Cloud')
     parser._action_groups.pop()
     required = parser.add_argument_group('required arguments')
     required.add_argument('-f',
-                          dest="config_file",
-                          help="path to Confluent Cloud configuration file",
+                          dest='config_file',
+                          help='path to Confluent Cloud configuration file',
                           required=True)
     required.add_argument('-t',
-                          dest="topic",
-                          help="topic name",
+                          dest='topic',
+                          help='topic name',
                           required=True)
     args = parser.parse_args()
 
@@ -140,7 +140,7 @@ def read_ccloud_config(config_file):
     with open(config_file) as fh:
         for line in fh:
             line = line.strip()
-            if len(line) != 0 and line[0] != "#":
+            if len(line) != 0 and line[0] != '#':
                 parameter, value = line.strip().split('=', 1)
                 conf[parameter] = value.strip()
 
@@ -177,10 +177,10 @@ def create_topic(conf, topic):
     for topic, f in fs.items():
         try:
             f.result()  # The result itself is None
-            print("Topic {} created".format(topic))
+            print('Topic {} created'.format(topic))
         except Exception as e:
             # Continue if error code TOPIC_ALREADY_EXISTS, which may be true
             # Otherwise fail fast
             if e.args[0].code() != KafkaError.TOPIC_ALREADY_EXISTS:
-                print("Failed to create topic {}: {}".format(topic, e))
+                print('Failed to create topic {}: {}'.format(topic, e))
                 sys.exit(1)

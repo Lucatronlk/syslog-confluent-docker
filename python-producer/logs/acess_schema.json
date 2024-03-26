@@ -36,4 +36,3 @@
       "required": ["timestamp", "logger", "ip_address", "user", "request", "status_code", "response_size", "referrer", "user_agent"]
     }
   }
-  

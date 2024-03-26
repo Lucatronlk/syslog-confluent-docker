@@ -33,4 +33,3 @@
       "required": ["timestamp", "logger", "severity", "protocol", "source", "destination", "action", "attack_type"]
     }
   }
-  
