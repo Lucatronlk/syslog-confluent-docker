@@ -1,8 +1,8 @@
 # Dockerfile and docker-compose  for standing up one or more Confluent self-managed syslog connectors
 
-## Create python.config and .env file in the root director
+## Create python.config and .env file in the root directory
 
-### python config
+### python.config
 
 ```bash
 # Required connection configs for Kafka producer, consumer, and admin
